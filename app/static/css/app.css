@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  color: #1f2937;
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  background: #f8fafc;
+}
+
+a {
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.site-header nav {
+  display: flex;
+  gap: 16px;
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
