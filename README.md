@@ -36,7 +36,15 @@ cp .env.example .env
 
 然后修改 `.env` 中的数据库连接。
 
-4. 初始化数据库
+4. 创建 MySQL 数据库和数据表
+
+```bash
+mysql -u root -p < database/schema.sql
+```
+
+数据库结构说明见 `docs/database.md`。
+
+5. 如果使用 Flask-Migrate 管理表结构
 
 ```bash
 flask db init
@@ -44,7 +52,7 @@ flask db migrate -m "init database"
 flask db upgrade
 ```
 
-5. 启动项目
+6. 启动项目
 
 ```bash
 flask run
@@ -80,4 +88,3 @@ HouseRent/
 - C：房源发布、图片上传、搜索、详情
 - D：预约、合同、支付、维修、投诉
 - E：页面、后台、新闻、报表、测试文档
-
