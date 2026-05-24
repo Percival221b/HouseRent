@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}个人中心 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom:24px;">个人中心</h1>
+
+<div class="profile-page">
+  <aside class="profile-sidebar">
+    <a href="#info" class="active" onclick="showSection('info', this)">基本信息</a>
+    <a href="#password" onclick="showSection('password', this)">修改密码</a>
+    {% if current_user.role == 'tenant' %}
+      <a href="#history" onclick="showSection('history', this)">租住记录</a>
+    {% elif current_user.role == 'landlord' %}
+      <a href="#history" onclick="showSection('history', this)">我的发布</a>
+    {% endif %}
+  </aside>
+
+  <div>
+    <!-- 基本信息 -->
+    <section id="section-info" class="card">
+      <h2 style="margin-bottom:20px;">基本信息</h2>
+
+      <!-- 头像独立表单 -->
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('user.upload_avatar') }}" id="avatar-form"></form>
+
+      <div class="avatar-section">
+        {% if current_user.avatar_url %}
+          <img src="{{ current_user.avatar_url }}" alt="头像" class="avatar-img">
+        {% else %}
+          <div class="avatar-default">{{ current_user.username[0] | upper }}</div>
+        {% endif %}
+        <div>
+          <input type="file" name="avatar" accept=".jpg,.jpeg,.png" form="avatar-form"
+                 style="margin-bottom:6px;" onchange="document.getElementById('avatar-form').submit()">
+          <p class="form-hint">支持 JPG/PNG，最大 2MB（选择文件后自动上传）</p>
+        </div>
+      </div>
+
+      <!-- 资料修改表单 -->
+      <form method="POST" action="{{ url_for('user.profile') }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>用户名</label>
+            <input type="text" value="{{ current_user.username }}" disabled>
+          </div>
+          <div class="form-group">
+            <label>角色</label>
+            <input type="text" value="{% if current_user.role == 'tenant' %}租客{% elif current_user.role == 'landlord' %}房东{% else %}管理员{% endif %}" disabled>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="real_name">真实姓名</label>
+            <input type="text" id="real_name" name="real_name" value="{{ current_user.real_name or '' }}">
+          </div>
+          <div class="form-group">
+            <label for="phone">手机号</label>
+            <input type="tel" id="phone" name="phone" value="{{ current_user.phone or '' }}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">邮箱</label>
+          <input type="email" id="email" name="email" value="{{ current_user.email or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:auto;">保存修改</button>
+      </form>
+    </section>
+
+    <!-- 修改密码 -->
+    <section id="section-password" class="card" style="display:none;">
+      <h2 style="margin-bottom:20px;">修改密码</h2>
+      <form method="POST" action="{{ url_for('user.change_password') }}">
+        <div class="form-group">
+          <label for="old_password">当前密码</label>
+          <input type="password" id="old_password" name="old_password" required>
+        </div>
+        <div class="form-group">
+          <label for="new_password">新密码</label>
+          <input type="password" id="new_password" name="new_password" required placeholder="8-20 位，含大小写字母和数字">
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">确认新密码</label>
+          <input type="password" id="confirm_password" name="confirm_password" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:auto;">修改密码</button>
+      </form>
+    </section>
+
+    <!-- 租住记录 -->
+    {% if current_user.role in ('tenant', 'landlord') %}
+    <section id="section-history" class="card" style="display:none;">
+      <h2 style="margin-bottom:20px;">租住记录</h2>
+      <p style="color:var(--gray-500);">
+        <a href="{{ url_for('user.history') }}">查看详细记录 →</a>
+      </p>
+    </section>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function showSection(name, el) {
+  document.querySelectorAll('.profile-sidebar a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('section-info').style.display = name === 'info' ? '' : 'none';
+  document.getElementById('section-password').style.display = name === 'password' ? '' : 'none';
+  var h = document.getElementById('section-history');
+  if (h) h.style.display = name === 'history' ? '' : 'none';
+}
+</script>
+{% endblock %}

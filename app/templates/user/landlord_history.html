@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}出租历史 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom:24px;">出租历史</h1>
+<div class="card">
+  {% if houses %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>房源</th><th>区域</th><th>租金</th><th>状态</th><th>发布时间</th></tr>
+        </thead>
+        <tbody>
+          {% for h in houses %}
+          <tr>
+            <td>{{ h.title }}</td>
+            <td>{{ h.district or '-' }}</td>
+            <td>¥{{ '%.2f' | format(h.rent) }}</td>
+            <td><span class="badge {% if h.status == 'vacant' %}badge-success{% else %}badge-info{% endif %}">{{ h.status }}</span></td>
+            <td>{{ h.created_at.strftime('%Y-%m-%d') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p style="color:var(--gray-500);">暂未发布房源</p>
+  {% endif %}
+  <p class="mt-16"><a href="{{ url_for('user.profile') }}">← 返回个人中心</a></p>
+</div>
+{% endblock %}
