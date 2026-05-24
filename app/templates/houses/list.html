@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}房源列表 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<div class="list-page">
+  <aside class="search-sidebar">
+    <h2>筛选房源</h2>
+    <form method="get" action="{{ url_for('houses.list_houses') }}" id="search-form" class="search-form">
+      <div class="form-group">
+        {{ form.keyword.label }}
+        {{ form.keyword(class="form-input", placeholder="输入关键词搜索") }}
+      </div>
+      <div class="form-group">
+        {{ form.district.label }}
+        {{ form.district(class="form-input") }}
+      </div>
+      <div class="form-group">
+        {{ form.layout.label }}
+        {{ form.layout(class="form-input") }}
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.rent_min.label }}
+          {{ form.rent_min(class="form-input", placeholder="最低") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.rent_max.label }}
+          {{ form.rent_max(class="form-input", placeholder="最高") }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.area_min.label }}
+          {{ form.area_min(class="form-input", placeholder="最小") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.area_max.label }}
+          {{ form.area_max(class="form-input", placeholder="最大") }}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.decoration.label }}
+        {{ form.decoration(class="form-input") }}
+      </div>
+      <div class="form-group">
+        {{ form.orientation.label }}
+        {{ form.orientation(class="form-input") }}
+      </div>
+      <button type="submit" class="btn btn--primary btn--block">搜索</button>
+      <a href="{{ url_for('houses.list_houses') }}" class="btn btn--secondary btn--block" style="margin-top:8px">重置</a>
+    </form>
+  </aside>
+
+  <div class="list-main">
+    <div class="list-header">
+      <span class="list-count">共 {{ pagination.total }} 套房源</span>
+      <div class="list-sort">
+        <label for="sort-select">排序：</label>
+        <select id="sort-select" class="form-input form-input--inline">
+          {% for value, label in sort_choices %}
+          <option value="{{ value }}" {% if current_sort == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {% if houses %}
+    <div class="house-grid">
+      {% for house in houses %}
+        {% include "houses/_house_card.html" %}
+      {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for('houses.list_houses', page=pagination.prev_num, **pagination_args) }}" class="pagination__link">&laquo; 上一页</a>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <a href="{{ url_for('houses.list_houses', page=p, **pagination_args) }}"
+           class="pagination__link {% if p == pagination.page %}pagination__link--active{% endif %}">{{ p }}</a>
+        {% else %}
+        <span class="pagination__dots">...</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+      <a href="{{ url_for('houses.list_houses', page=pagination.next_num, **pagination_args) }}" class="pagination__link">下一页 &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <p>暂无符合条件的房源。</p>
+      {% if current_user.is_authenticated and current_user.role == 'landlord' %}
+      <a href="{{ url_for('houses.create') }}" class="btn btn--primary">发布房源</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

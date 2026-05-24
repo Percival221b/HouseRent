@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}{{ house.title }} - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <div class="detail-gallery">
+    {% if images %}
+    <div class="gallery-main">
+      {% set cover = images | selectattr("is_cover", "eq", True) | first or images[0] %}
+      <img src="{{ url_for('static', filename=cover.file_path) }}" alt="{{ house.title }}" id="gallery-main-img">
+    </div>
+    {% if images | length > 1 %}
+    <div class="gallery-thumbs">
+      {% for img in images %}
+      <button class="gallery-thumb {% if loop.first %}active{% endif %}"
+              data-src="{{ url_for('static', filename=img.file_path) }}">
+        <img src="{{ url_for('static', filename=img.file_path) }}" alt="{{ img.caption or house.title }}" loading="lazy">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="gallery-placeholder">暂无图片</div>
+    {% endif %}
+  </div>
+
+  <div class="detail-info">
+    <div class="detail-header">
+      <h1>{{ house.title }}</h1>
+      <div class="detail-status">
+        {% if house.status == "vacant" %}<span class="badge badge--success">空置</span>
+        {% elif house.status == "rented" %}<span class="badge badge--warning">已出租</span>
+        {% elif house.status == "maintenance" %}<span class="badge badge--info">维修中</span>
+        {% elif house.status == "offline" %}<span class="badge badge--danger">已下架</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="detail-price">
+      <span class="price-value">&yen;{{ house.rent | int }}</span>
+      <span class="price-unit">/月</span>
+      {% if house.deposit %}
+      <span class="deposit">押金 &yen;{{ house.deposit | int }}</span>
+      {% endif %}
+    </div>
+
+    <div class="detail-attributes">
+      <div class="attr-item">
+        <span class="attr-label">户型</span>
+        <span class="attr-value">{{ house.layout or "未填写" }}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">面积</span>
+        <span class="attr-value">{% if house.area %}{{ house.area }}m²{% else %}未填写{% endif %}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">朝向</span>
+        <span class="attr-value">{{ house.orientation or "未填写" }}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">楼层</span>
+        <span class="attr-value">{% if house.floor %}{{ house.floor }}/{{ house.total_floor }}层{% else %}未填写{% endif %}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">装修</span>
+        <span class="attr-value">{{ house.decoration or "未填写" }}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">类型</span>
+        <span class="attr-value">{{ house.house_type or "未填写" }}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">区域</span>
+        <span class="attr-value">{{ house.district or "未填写" }}</span>
+      </div>
+      <div class="attr-item">
+        <span class="attr-label">小区</span>
+        <span class="attr-value">{{ house.community or "未填写" }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>地址</h3>
+      <p>{{ house.address }}</p>
+      {% if house.business_area %}<p class="detail-sub">商圈：{{ house.business_area }}</p>{% endif %}
+    </div>
+
+    {% if house.facilities %}
+    <div class="detail-section">
+      <h3>配套设施</h3>
+      <div class="facility-tags">
+        {% for f in house.facilities %}
+        <span class="tag tag--facility">{{ f }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if house.description %}
+    <div class="detail-section">
+      <h3>房源描述</h3>
+      <div class="description-text">{{ house.description | replace('\n', '<br>') | safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if house.video_url %}
+    <div class="detail-section">
+      <h3>视频链接</h3>
+      <a href="{{ house.video_url }}" target="_blank" rel="noopener">{{ house.video_url }}</a>
+    </div>
+    {% endif %}
+
+    <div class="detail-section detail-meta">
+      <p>发布于 {{ house.created_at.strftime('%Y-%m-%d') }}{% if house.updated_at != house.created_at %} · 更新于 {{ house.updated_at.strftime('%Y-%m-%d') }}{% endif %}</p>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.id == house.landlord_id %}
+    <div class="detail-actions">
+      <a href="{{ url_for('houses.edit', id=house.id) }}" class="btn btn--primary">编辑房源</a>
+      <form method="post" action="{{ url_for('houses.delete', id=house.id) }}" style="display:inline"
+            onsubmit="return confirm('确定要下架该房源吗？')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn--danger">下架房源</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
