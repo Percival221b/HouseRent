@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}新建预约 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>新建看房预约</h1>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <p>
+    <label>选择房源：</label><br>
+    <select name="house_id" required>
+      <option value="">-- 请选择 --</option>
+      {% for h in houses %}
+        <option value="{{ h.id }}" {% if selected_house_id == h.id %}selected{% endif %}>
+          {{ h.title }} - {{ h.address }} - ¥{{ "%.2f"|format(h.rent) }}/月
+        </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label>{{ form.appointment_time.label }}：</label><br>
+    {{ form.appointment_time(size=20) }}
+    {% for error in form.appointment_time.errors %}
+      <span style="color:red;">{{ error }}</span>
+    {% endfor %}
+  </p>
+
+  <p>
+    <label>{{ form.remark.label }}：</label><br>
+    {{ form.remark(rows=4, cols=40) }}
+  </p>
+
+  <button type="submit">提交预约</button>
+</form>
+
+<p><a href="{{ url_for('appointments.list_appointments') }}">← 返回列表</a></p>
+{% endblock %}

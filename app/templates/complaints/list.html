@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}投诉管理 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>投诉管理</h1>
+
+{% if current_user.role == "tenant" %}
+  <p><a href="{{ url_for('complaints.create') }}">+ 提交投诉</a></p>
+{% endif %}
+
+{% if complaints %}
+  <table border="1" cellpadding="8" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>房源</th>
+        <th>投诉人</th>
+        <th>被投诉人</th>
+        <th>标题</th>
+        <th>处理人</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in complaints %}
+        <tr>
+          <td>{{ c.id }}</td>
+          <td>{{ c.house.title if c.house else '-' }}</td>
+          <td>{{ c.tenant.username }}</td>
+          <td>{{ c.target_user.username if c.target_user else '-' }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.handler.username if c.handler else '待分配' }}</td>
+          <td>{{ c.status }}</td>
+          <td><a href="{{ url_for('complaints.detail', complaint_id=c.id) }}">查看</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>暂无投诉记录。</p>
+{% endif %}
+{% endblock %}

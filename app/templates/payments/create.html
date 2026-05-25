@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}新建收款单 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>新建收款单</h1>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <p>
+    <label>选择合同：</label><br>
+    <select name="contract_id" required>
+      <option value="">-- 请选择 --</option>
+      {% for c in contracts %}
+        <option value="{{ c.id }}" {% if selected_contract_id == c.id %}selected{% endif %}>
+          {{ c.contract_no }} - {{ c.house.title if c.house else '-' }} - 租客：{{ c.tenant.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label>{{ form.amount.label }}：</label><br>
+    {{ form.amount() }}
+    {% for error in form.amount.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <p>
+    <label>{{ form.payment_type.label }}：</label><br>
+    {{ form.payment_type() }}
+  </p>
+
+  <p>
+    <label>{{ form.payment_method.label }}：</label><br>
+    {{ form.payment_method() }}
+  </p>
+
+  <p>
+    <label>{{ form.due_date.label }}：</label><br>
+    {{ form.due_date() }}
+    {% for error in form.due_date.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <button type="submit">创建收款单</button>
+</form>
+
+<p><a href="{{ url_for('payments.list_payments') }}">← 返回列表</a></p>
+{% endblock %}

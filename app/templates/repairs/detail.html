@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}报修详情 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>报修详情</h1>
+
+{% set r = repair %}
+<table border="1" cellpadding="8" cellspacing="0">
+  <tr><td width="120">ID</td><td>{{ r.id }}</td></tr>
+  <tr><td>房源</td><td>{{ r.house.title if r.house else '-' }} ({{ r.house.address if r.house else '-' }})</td></tr>
+  <tr><td>问题概述</td><td>{{ r.title }}</td></tr>
+  <tr><td>问题描述</td><td>{{ r.description }}</td></tr>
+  <tr><td>报修人</td><td>{{ r.tenant.username }}</td></tr>
+  <tr><td>处理人</td><td>{{ r.handler.username if r.handler else '待分配' }}</td></tr>
+  <tr><td>状态</td><td>{{ r.status }}</td></tr>
+  <tr><td>处理结果</td><td>{{ r.result or '-' }}</td></tr>
+  <tr><td>报修时间</td><td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') if r.created_at else '-' }}</td></tr>
+  <tr><td>处理时间</td><td>{{ r.handled_at.strftime('%Y-%m-%d %H:%M') if r.handled_at else '未处理' }}</td></tr>
+</table>
+
+<p><a href="{{ url_for('repairs.list_repairs') }}">← 返回列表</a></p>
+
+{% if r.status == "pending" %}
+  {% set house = r.house %}
+  {% if current_user.role in ("landlord", "admin") and (current_user.role == "admin" or house.landlord_id == current_user.id) %}
+    <div style="border:1px solid #ccc;padding:12px;margin-top:12px;">
+      <h3>处理报修</h3>
+      <form method="post" action="{{ url_for('repairs.process', repair_id=r.id) }}" style="margin-bottom:8px;">
+        <button type="submit">接单处理</button>
+      </form>
+      <form method="post" action="{{ url_for('repairs.reject', repair_id=r.id) }}">
+        <label>拒绝原因：</label><br>
+        <textarea name="result" rows="2" cols="40"></textarea><br>
+        <button type="submit" style="background:#c00;color:#fff;">拒绝</button>
+      </form>
+    </div>
+  {% endif %}
+{% endif %}
+
+{% if r.status == "processing" and current_user.id == r.handler_id %}
+  <div style="border:1px solid #ccc;padding:12px;margin-top:12px;">
+    <h3>标记完成</h3>
+    <form method="post" action="{{ url_for('repairs.finish', repair_id=r.id) }}">
+      <label>处理结果：</label><br>
+      <textarea name="result" rows="3" cols="40"></textarea><br>
+      <button type="submit" style="background:#090;color:#fff;">标记完成</button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}投诉详情 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>投诉详情</h1>
+
+{% set c = complaint %}
+<table border="1" cellpadding="8" cellspacing="0">
+  <tr><td width="120">ID</td><td>{{ c.id }}</td></tr>
+  <tr><td>关联房源</td><td>{{ c.house.title if c.house else '不关联' }}</td></tr>
+  <tr><td>投诉人</td><td>{{ c.tenant.username }}</td></tr>
+  <tr><td>被投诉人</td><td>{{ c.target_user.username if c.target_user else '未指定' }}</td></tr>
+  <tr><td>标题</td><td>{{ c.title }}</td></tr>
+  <tr><td>投诉内容</td><td>{{ c.content }}</td></tr>
+  <tr><td>处理人</td><td>{{ c.handler.username if c.handler else '待分配' }}</td></tr>
+  <tr><td>状态</td><td>{{ c.status }}</td></tr>
+  <tr><td>处理结果</td><td>{{ c.result or '-' }}</td></tr>
+  <tr><td>投诉时间</td><td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '-' }}</td></tr>
+  <tr><td>处理时间</td><td>{{ c.handled_at.strftime('%Y-%m-%d %H:%M') if c.handled_at else '未处理' }}</td></tr>
+</table>
+
+<p><a href="{{ url_for('complaints.list_complaints') }}">← 返回列表</a></p>
+
+{% if c.status == "pending" and current_user.role in ("landlord", "admin") %}
+  <div style="border:1px solid #ccc;padding:12px;margin-top:12px;">
+    <h3>处理投诉</h3>
+    <form method="post" action="{{ url_for('complaints.process', complaint_id=c.id) }}" style="margin-bottom:8px;">
+      <button type="submit">接单处理</button>
+    </form>
+    <form method="post" action="{{ url_for('complaints.reject', complaint_id=c.id) }}">
+      <label>驳回原因：</label><br>
+      <textarea name="result" rows="2" cols="40"></textarea><br>
+      <button type="submit" style="background:#c00;color:#fff;">驳回</button>
+    </form>
+  </div>
+{% endif %}
+
+{% if c.status == "processing" and current_user.id == c.handler_id %}
+  <div style="border:1px solid #ccc;padding:12px;margin-top:12px;">
+    <h3>处理结果</h3>
+    <form method="post" action="{{ url_for('complaints.resolve', complaint_id=c.id) }}">
+      <label>处理结果：</label><br>
+      <textarea name="result" rows="3" cols="40"></textarea><br>
+      <button type="submit" style="background:#090;color:#fff;">标记已解决</button>
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

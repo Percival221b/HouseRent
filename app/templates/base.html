@@ -11,11 +11,34 @@
       <a href="{{ url_for('main.index') }}">HouseRent</a>
       <nav>
         <a href="{{ url_for('houses.list_houses') }}">房源</a>
+        <a href="{{ url_for('appointments.list_appointments') }}">预约</a>
+        <a href="{{ url_for('contracts.list_contracts') }}">合同</a>
+        <a href="{{ url_for('payments.list_payments') }}">支付</a>
+        <a href="{{ url_for('repairs.list_repairs') }}">维修</a>
+        <a href="{{ url_for('complaints.list_complaints') }}">投诉</a>
         <a href="{{ url_for('auth.login') }}">登录</a>
         <a href="{{ url_for('auth.register') }}">注册</a>
       </nav>
+      <p style="margin:4px 0;font-size:14px;">
+        {% if current_user.is_authenticated %}
+          当前角色：<strong>{{ current_user.username }}</strong>（{{ current_user.role }}）
+          | <a href="{{ url_for('appointments.dev_login', user_id=1) }}">切换租客</a>
+          | <a href="{{ url_for('appointments.dev_login', user_id=2) }}">切换房东</a>
+        {% else %}
+          未登录 |
+          <a href="{{ url_for('appointments.dev_login', user_id=1) }}">登录为租客</a>
+          | <a href="{{ url_for('appointments.dev_login', user_id=2) }}">登录为房东</a>
+        {% endif %}
+      </p>
     </header>
     <main class="page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <p class="flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
       {% block content %}{% endblock %}
     </main>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>

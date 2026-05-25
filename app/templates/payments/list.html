@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}支付管理 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>支付管理</h1>
+
+{% if current_user.role in ("landlord", "admin") %}
+  <p><a href="{{ url_for('payments.create') }}">+ 新建收款单</a></p>
+{% endif %}
+
+{% if payments %}
+  <table border="1" cellpadding="8" cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>合同编号</th>
+        <th>类型</th>
+        <th>金额</th>
+        <th>付款方</th>
+        <th>截止日期</th>
+        <th>状态</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in payments %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ p.contract.contract_no if p.contract else '-' }}</td>
+          <td>{{ p.payment_type }}</td>
+          <td>¥{{ "%.2f"|format(p.amount) }}</td>
+          <td>{{ p.payer.username }}</td>
+          <td>{{ p.due_date }}</td>
+          <td>{{ p.status }}</td>
+          <td><a href="{{ url_for('payments.detail', payment_id=p.id) }}">查看</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>暂无支付记录。</p>
+{% endif %}
+{% endblock %}

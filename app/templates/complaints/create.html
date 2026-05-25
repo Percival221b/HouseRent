@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}提交投诉 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>提交投诉</h1>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <p>
+    <label>{{ form.house_id.label }}：</label><br>
+    {{ form.house_id() }}
+  </p>
+
+  <p>
+    <label>{{ form.target_user_id.label }}：</label><br>
+    {{ form.target_user_id() }}
+  </p>
+
+  <p>
+    <label>{{ form.title.label }}：</label><br>
+    {{ form.title(size=50) }}
+    {% for error in form.title.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <p>
+    <label>{{ form.content.label }}：</label><br>
+    {{ form.content(rows=8, cols=50) }}
+    {% for error in form.content.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <button type="submit">提交投诉</button>
+</form>
+
+<p><a href="{{ url_for('complaints.list_complaints') }}">← 返回列表</a></p>
+{% endblock %}

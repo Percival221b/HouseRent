@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}提交报修 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>提交报修</h1>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <p>
+    <label>选择房源：</label><br>
+    <select name="house_id" required>
+      <option value="">-- 请选择 --</option>
+      {% for h in houses %}
+        <option value="{{ h.id }}" {% if selected_house_id == h.id %}selected{% endif %}>
+          {{ h.title }} - {{ h.address }}
+        </option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>
+    <label>{{ form.title.label }}：</label><br>
+    {{ form.title(size=50) }}
+    {% for error in form.title.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <p>
+    <label>{{ form.description.label }}：</label><br>
+    {{ form.description(rows=6, cols=50) }}
+    {% for error in form.description.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
+  </p>
+
+  <button type="submit">提交报修</button>
+</form>
+
+<p><a href="{{ url_for('repairs.list_repairs') }}">← 返回列表</a></p>
+{% endblock %}

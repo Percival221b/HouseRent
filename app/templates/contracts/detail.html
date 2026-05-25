@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}合同详情 - {{ contract.contract_no }}{% endblock %}
+
+{% block content %}
+<h1>合同详情</h1>
+
+{% set c = contract %}
+<table border="1" cellpadding="8" cellspacing="0">
+  <tr><td width="120">合同编号</td><td>{{ c.contract_no }}</td></tr>
+  <tr><td>房源</td><td>{{ c.house.title if c.house else '-' }} ({{ c.house.address if c.house else '-' }})</td></tr>
+  <tr><td>租客</td><td>{{ c.tenant.username }}</td></tr>
+  <tr><td>房东</td><td>{{ c.landlord.username }}</td></tr>
+  <tr><td>租期</td><td>{{ c.start_date }} ~ {{ c.end_date }}</td></tr>
+  <tr><td>月租金</td><td>¥{{ "%.2f"|format(c.monthly_rent) }}</td></tr>
+  <tr><td>押金</td><td>¥{{ "%.2f"|format(c.deposit) if c.deposit else '-' }}</td></tr>
+  <tr><td>状态</td><td>{{ c.status }}</td></tr>
+  <tr><td>房东签署时间</td><td>{{ c.signed_by_landlord_at.strftime('%Y-%m-%d %H:%M') if c.signed_by_landlord_at else '未签署' }}</td></tr>
+  <tr><td>租客签署时间</td><td>{{ c.signed_by_tenant_at.strftime('%Y-%m-%d %H:%M') if c.signed_by_tenant_at else '未签署' }}</td></tr>
+  <tr><td>创建时间</td><td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '-' }}</td></tr>
+</table>
+
+{% if c.content %}
+  <h3>合同条款</h3>
+  <pre style="background:#f5f5f5;padding:12px;white-space:pre-wrap;">{{ c.content }}</pre>
+{% endif %}
+
+<p><a href="{{ url_for('contracts.list_contracts') }}">← 返回列表</a></p>
+
+{% if c.status in ("draft", "pending_signed") %}
+
+  <div style="border:1px solid #ccc;padding:12px;margin-top:12px;">
+    <h3>签署合同</h3>
+    {% if not c.signed_by_landlord_at and current_user.id == c.landlord_id %}
+      <form method="post" action="{{ url_for('contracts.sign', contract_id=c.id) }}">
+        <button type="submit">房东签署</button>
+      </form>
+    {% endif %}
+    {% if not c.signed_by_tenant_at and current_user.id == c.tenant_id %}
+      <form method="post" action="{{ url_for('contracts.sign', contract_id=c.id) }}">
+        <button type="submit">租客签署</button>
+      </form>
+    {% endif %}
+    {% if c.signed_by_landlord_at and c.signed_by_tenant_at %}
+      <p>双方已签署，合同将自动生效。</p>
+    {% endif %}
+  </div>
+
+  {% if current_user.id == c.landlord_id %}
+    <form method="post" action="{{ url_for('contracts.cancel_contract', contract_id=c.id) }}" style="margin-top:12px;">
+      <button type="submit" style="background:#c00;color:#fff;">取消合同</button>
+    </form>
+  {% endif %}
+
+{% endif %}
+
+{% if c.status == "active" and current_user.id in (c.tenant_id, c.landlord_id) %}
+  <form method="post" action="{{ url_for('contracts.end_contract', contract_id=c.id) }}" style="margin-top:12px;">
+    <button type="submit" style="background:#c00;color:#fff;">终止合同</button>
+  </form>
+{% endif %}
+{% endblock %}

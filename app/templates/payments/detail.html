@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}支付详情 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1>支付详情</h1>
+
+{% set p = payment %}
+<table border="1" cellpadding="8" cellspacing="0">
+  <tr><td width="120">ID</td><td>{{ p.id }}</td></tr>
+  <tr><td>合同编号</td><td>
+    {% if p.contract %}
+      <a href="{{ url_for('contracts.detail', contract_id=p.contract.id) }}">{{ p.contract.contract_no }}</a>
+    {% else %}-{% endif %}
+  </td></tr>
+  <tr><td>费用类型</td><td>{{ p.payment_type }}</td></tr>
+  <tr><td>支付方式</td><td>{{ p.payment_method }}</td></tr>
+  <tr><td>金额</td><td>¥{{ "%.2f"|format(p.amount) }}</td></tr>
+  <tr><td>付款方</td><td>{{ p.payer.username }}</td></tr>
+  <tr><td>截止日期</td><td>{{ p.due_date }}</td></tr>
+  <tr><td>状态</td><td>{{ p.status }}</td></tr>
+  <tr><td>支付时间</td><td>{{ p.paid_at.strftime('%Y-%m-%d %H:%M:%S') if p.paid_at else '未支付' }}</td></tr>
+  <tr><td>交易号</td><td>{{ p.transaction_no or '-' }}</td></tr>
+  <tr><td>创建时间</td><td>{{ p.created_at.strftime('%Y-%m-%d %H:%M') if p.created_at else '-' }}</td></tr>
+</table>
+
+<p><a href="{{ url_for('payments.list_payments') }}">← 返回列表</a></p>
+
+{% if p.status == "pending" %}
+  {% if current_user.id == p.payer_id %}
+    <form method="post" action="{{ url_for('payments.pay', payment_id=p.id) }}" style="margin-top:12px;">
+      <button type="submit" style="background:#090;color:#fff;padding:8px 24px;">模拟支付</button>
+    </form>
+  {% endif %}
+  {% if current_user.role == "landlord" %}
+    <form method="post" action="{{ url_for('payments.cancel', payment_id=p.id) }}" style="margin-top:12px;">
+      <button type="submit" style="background:#c00;color:#fff;">取消收款单</button>
+    </form>
+  {% endif %}
+{% endif %}
+
+{% if p.status == "paid" and current_user.role == "landlord" %}
+  <form method="post" action="{{ url_for('payments.refund', payment_id=p.id) }}" style="margin-top:12px;">
+    <button type="submit" style="background:#c00;color:#fff;">退款</button>
+  </form>
+{% endif %}
+{% endblock %}
