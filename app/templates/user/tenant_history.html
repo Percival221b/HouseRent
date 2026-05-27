@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}租赁历史 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom:24px;">租赁历史</h1>
+<div class="card">
+  {% if contracts %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>合同编号</th><th>月租金</th><th>开始日期</th><th>结束日期</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+          {% for c in contracts %}
+          <tr>
+            <td>{{ c.contract_no }}</td>
+            <td>¥{{ '%.2f' | format(c.monthly_rent) }}</td>
+            <td>{{ c.start_date }}</td>
+            <td>{{ c.end_date }}</td>
+            <td><span class="badge badge-info">{{ c.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p style="color:var(--gray-500);">暂无租赁记录</p>
+  {% endif %}
+  <p class="mt-16"><a href="{{ url_for('user.profile') }}">← 返回个人中心</a></p>
+</div>
+{% endblock %}

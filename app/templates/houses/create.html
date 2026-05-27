@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}{% if editing %}编辑房源{% else %}发布房源{% endif %} - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <h1>{% if editing %}编辑房源{% else %}发布新房源{% endif %}</h1>
+
+  <form method="post" enctype="multipart/form-data" class="house-form" novalidate>
+    {{ form.csrf_token }}
+
+    <fieldset class="form-section">
+      <legend>基本信息</legend>
+      <div class="form-group">
+        {{ form.title.label }}
+        {{ form.title(class="form-input", placeholder="例如：精装修两室一厅 近地铁") }}
+        {% if form.title.errors %}<span class="form-error">{{ form.title.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.district.label }}
+          {{ form.district(class="form-input") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.business_area.label }}
+          {{ form.business_area(class="form-input", placeholder="例如：望京") }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.community.label }}
+          {{ form.community(class="form-input", placeholder="小区名称") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.house_type.label }}
+          {{ form.house_type(class="form-input", placeholder="例如：普通住宅、公寓") }}
+        </div>
+      </div>
+      <div class="form-group">
+        {{ form.address.label }}
+        {{ form.address(class="form-input", placeholder="详细地址") }}
+        {% if form.address.errors %}<span class="form-error">{{ form.address.errors[0] }}</span>{% endif %}
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend>房屋详情</legend>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.layout.label }}
+          {{ form.layout(class="form-input") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.orientation.label }}
+          {{ form.orientation(class="form-input") }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--third">
+          {{ form.area.label }}
+          {{ form.area(class="form-input", placeholder="平方米", step="0.01") }}
+        </div>
+        <div class="form-group form-group--third">
+          {{ form.floor.label }}
+          {{ form.floor(class="form-input", placeholder="所在楼层", min="1") }}
+        </div>
+        <div class="form-group form-group--third">
+          {{ form.total_floor.label }}
+          {{ form.total_floor(class="form-input", placeholder="总楼层", min="1") }}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.decoration.label }}
+          {{ form.decoration(class="form-input") }}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.status.label }}
+          {{ form.status(class="form-input") }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend>租金信息</legend>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          {{ form.rent.label }}
+          {{ form.rent(class="form-input", placeholder="元/月", step="0.01") }}
+          {% if form.rent.errors %}<span class="form-error">{{ form.rent.errors[0] }}</span>{% endif %}
+        </div>
+        <div class="form-group form-group--half">
+          {{ form.deposit.label }}
+          {{ form.deposit(class="form-input", placeholder="元", step="0.01") }}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend>配套设施</legend>
+      <div class="facility-checkboxes">
+        {% for label, text in [
+          ("空调", "空调"), ("冰箱", "冰箱"), ("洗衣机", "洗衣机"),
+          ("热水器", "热水器"), ("宽带", "宽带"), ("电视", "电视"),
+          ("床", "床"), ("衣柜", "衣柜"), ("沙发", "沙发"),
+          ("餐桌", "餐桌"), ("独立卫生间", "独立卫生间"), ("阳台", "阳台"),
+          ("电梯", "电梯"), ("燃气灶", "燃气灶"), ("暖气", "暖气")
+        ] %}
+        <label class="facility-checkbox">
+          {% set field = form["facility_" + label] %}
+          {{ field() }} {{ text }}
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend>详细描述</legend>
+      <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class="form-input form-textarea", rows="6", placeholder="描述房源特点、周边环境、交通情况等") }}
+      </div>
+      <div class="form-group">
+        {{ form.video_url.label }}
+        {{ form.video_url(class="form-input", placeholder="视频链接（可选）") }}
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend>房源图片</legend>
+      <div class="form-group">
+        <label>封面图片</label>
+        <input type="file" name="cover_image" accept="image/*" class="form-file" id="cover-image-input">
+        <div class="image-preview" id="cover-preview"></div>
+      </div>
+      <div class="form-group">
+        <label>更多图片（可多选）</label>
+        <input type="file" name="images" accept="image/*" multiple class="form-file" id="images-input">
+        <div class="image-preview-list" id="images-preview"></div>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary btn--lg">
+        {% if editing %}保存修改{% else %}发布房源{% endif %}
+      </button>
+      <a href="{% if editing %}{{ url_for('houses.detail', id=house.id) }}{% else %}{{ url_for('houses.list_houses') }}{% endif %}"
+         class="btn btn--secondary btn--lg">取消</a>
+    </div>
+  </form>
+
+  {% if editing and images %}
+  <section class="existing-images">
+    <h2>已上传图片</h2>
+    <div class="image-manage-grid">
+      {% for img in images %}
+      <div class="image-manage-item {% if img.is_cover %}is-cover{% endif %}">
+        <img src="{{ url_for('static', filename=img.file_path) }}" alt="{{ img.caption or '图片' }}" loading="lazy">
+        <div class="image-manage-actions">
+          {% if not img.is_cover %}
+          <form method="post" action="{{ url_for('houses.set_cover', id=house.id, image_id=img.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn--sm btn--outline">设为封面</button>
+          </form>
+          {% else %}
+          <span class="badge badge--success">封面</span>
+          {% endif %}
+          <form method="post" action="{{ url_for('houses.delete_image', id=house.id, image_id=img.id) }}" style="display:inline"
+                onsubmit="return confirm('确定删除这张图片吗？')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn--sm btn--danger">删除</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

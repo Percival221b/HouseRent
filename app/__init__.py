@@ -36,6 +36,7 @@ def register_blueprints(app: Flask) -> None:
     from app.routes.appointments import appointments_bp
     from app.routes.contracts import contracts_bp
     from app.routes.payments import payments_bp
+    from app.routes.profile import user_bp
     from app.routes.complaints import complaints_bp
     from app.routes.repairs import repairs_bp
 
@@ -45,6 +46,7 @@ def register_blueprints(app: Flask) -> None:
     app.register_blueprint(landlord_bp, url_prefix="/landlord")
     app.register_blueprint(tenant_bp, url_prefix="/tenant")
     app.register_blueprint(admin_bp, url_prefix="/admin")
+    app.register_blueprint(user_bp, url_prefix="/user")
     app.register_blueprint(appointments_bp, url_prefix="/appointments")
     app.register_blueprint(contracts_bp, url_prefix="/contracts")
     app.register_blueprint(payments_bp, url_prefix="/payments")
@@ -66,4 +68,3 @@ def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(500)
     def internal_error(error):
         return render_template("errors/500.html"), 500
-

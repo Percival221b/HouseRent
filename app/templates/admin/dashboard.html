@@ -1,8 +1,25 @@
 {% extends "base.html" %}
-
-{% block title %}管理员后台 - 房屋租赁系统{% endblock %}
+{% block title %}管理后台 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>管理员后台</h1>
-{% endblock %}
+<h1 style="margin-bottom:24px;">管理后台</h1>
 
+<div class="stats-grid">
+  <a href="{{ url_for('admin.users') }}" class="stat-card">
+    <div class="stat-value">→</div>
+    <div class="stat-label">用户管理</div>
+  </a>
+  <a href="{{ url_for('admin.logs') }}" class="stat-card">
+    <div class="stat-value">→</div>
+    <div class="stat-label">登录日志</div>
+  </a>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:12px;">快捷操作</h3>
+  <div style="display:flex;gap:12px;">
+    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">用户列表</a>
+    <a href="{{ url_for('admin.logs') }}" class="btn btn-secondary">登录日志</a>
+  </div>
+</div>
+{% endblock %}

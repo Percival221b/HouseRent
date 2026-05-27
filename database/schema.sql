@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
   id_card_number VARCHAR(30) NULL,
   status ENUM('active', 'disabled', 'pending') NOT NULL DEFAULT 'active',
   two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  login_fail_count INT NOT NULL DEFAULT 0,
+  locked_until DATETIME NULL,
   last_login_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -25,6 +27,34 @@ CREATE TABLE IF NOT EXISTS users (
   UNIQUE KEY uq_users_phone (phone),
   KEY idx_users_role (role),
   KEY idx_users_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS verification_codes (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  target VARCHAR(120) NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  code_type VARCHAR(20) NOT NULL DEFAULT 'register',
+  expires_at DATETIME NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_verification_codes_target (target),
+  KEY idx_verification_codes_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS login_logs (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  user_id BIGINT NULL,
+  ip_address VARCHAR(45) NULL,
+  device_info VARCHAR(255) NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'success',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_login_logs_user_id (user_id),
+  KEY idx_login_logs_created_at (created_at),
+  CONSTRAINT fk_login_logs_user
+    FOREIGN KEY (user_id) REFERENCES users (id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS houses (

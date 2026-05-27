@@ -1,0 +1,28 @@
+<div class="house-card">
+  <a href="{{ url_for('houses.detail', id=house.id) }}" class="house-card__image">
+    {% set cover = house.images.filter_by(is_cover=True).first() %}
+    {% if cover %}
+    <img src="{{ url_for('static', filename=cover.file_path) }}" alt="{{ house.title }}" loading="lazy">
+    {% else %}
+    <div class="house-card__placeholder">暂无图片</div>
+    {% endif %}
+    <span class="house-card__rent">&yen;{{ house.rent | int }}<small>/月</small></span>
+  </a>
+  <div class="house-card__body">
+    <h3 class="house-card__title">
+      <a href="{{ url_for('houses.detail', id=house.id) }}">{{ house.title }}</a>
+    </h3>
+    <p class="house-card__meta">
+      {% if house.layout %}{{ house.layout }}{% endif %}
+      {% if house.area %}<span class="house-card__separator">|</span> {{ house.area | int }}m²{% endif %}
+      {% if house.orientation %}<span class="house-card__separator">|</span> {{ house.orientation }}{% endif %}
+    </p>
+    <p class="house-card__address">
+      {% if house.district %}{{ house.district }} · {% endif %}{{ house.address }}
+    </p>
+    <div class="house-card__tags">
+      {% if house.decoration %}<span class="tag">{{ house.decoration }}</span>{% endif %}
+      {% if house.floor %}<span class="tag">{{ house.floor }}/{{ house.total_floor }}层</span>{% endif %}
+    </div>
+  </div>
+</div>

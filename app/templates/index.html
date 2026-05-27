@@ -3,7 +3,26 @@
 {% block title %}首页 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>房屋租赁系统</h1>
-<p>项目骨架已创建，各成员可以按模块继续开发。</p>
-{% endblock %}
+<div class="hero">
+  <h1>找到你的理想居所</h1>
+  <p>海量真实房源，轻松在线租赁</p>
+  <form action="{{ url_for('houses.list_houses') }}" method="get" class="hero-search">
+    <input type="text" name="keyword" placeholder="输入区域、小区名或关键词">
+    <button type="submit">搜索</button>
+  </form>
+</div>
 
+{% if featured_houses %}
+<div class="featured-section">
+  <h2>最新房源</h2>
+  <div class="house-grid">
+    {% for house in featured_houses %}
+      {% include "houses/_house_card.html" %}
+    {% endfor %}
+  </div>
+  <div style="text-align:center; margin-top: var(--spacing-xl);">
+    <a href="{{ url_for('houses.list_houses') }}" class="btn btn--outline">查看全部房源 &raquo;</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
