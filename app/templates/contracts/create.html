@@ -3,70 +3,82 @@
 {% block title %}新建合同 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>新建合同</h1>
+<div class="module-shell module-shell--narrow">
+  <div class="module-hero">
+    <span class="module-eyebrow">NEW CONTRACT</span>
+    <h1>新建合同</h1>
+    <p>填写租赁双方、租期和金额信息，生成可签署的租赁合同。</p>
+  </div>
 
-{% if appointment %}
-  <p>基于看房预约 #{{ appointment.id }} 创建合同</p>
-{% endif %}
+  <div class="module-card">
+    {% if appointment %}
+      <p class="badge badge--info">基于看房预约 #{{ appointment.id }} 创建合同</p>
+    {% endif %}
 
-<form method="post" novalidate>
-  {{ form.hidden_tag() }}
+    <form method="post" novalidate class="module-form">
+      {{ form.hidden_tag() }}
 
-  <p>
-    <label>选择房源：</label><br>
-    <select name="house_id" required>
-      <option value="">-- 请选择 --</option>
-      {% for h in houses %}
-        <option value="{{ h.id }}" {% if form.house_id.data == h.id %}selected{% endif %}>
-          {{ h.title }} - {{ h.address }} - ¥{{ "%.2f"|format(h.rent) }}/月
-        </option>
-      {% endfor %}
-    </select>
-  </p>
+      <div class="form-group">
+        <label>选择房源</label>
+        <select name="house_id" required>
+          <option value="">请选择房源</option>
+          {% for h in houses %}
+            <option value="{{ h.id }}" {% if form.house_id.data == h.id %}selected{% endif %}>
+              {{ h.title }} - {{ h.address }} - ¥{{ "%.2f"|format(h.rent) }}/月
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <p>
-    <label>选择租客：</label><br>
-    <select name="tenant_id" required>
-      <option value="">-- 请选择 --</option>
-      {% for t in tenants %}
-        <option value="{{ t.id }}" {% if form.tenant_id.data == t.id %}selected{% endif %}>
-          {{ t.username }} ({{ t.real_name or '未实名' }})
-        </option>
-      {% endfor %}
-    </select>
-  </p>
+      <div class="form-group">
+        <label>选择租客</label>
+        <select name="tenant_id" required>
+          <option value="">请选择租客</option>
+          {% for t in tenants %}
+            <option value="{{ t.id }}" {% if form.tenant_id.data == t.id %}selected{% endif %}>
+              {{ t.username }} ({{ t.real_name or '未实名' }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <p>
-    <label>{{ form.start_date.label }}：</label><br>
-    {{ form.start_date() }}
-    {% for error in form.start_date.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
-  </p>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          <label>{{ form.start_date.label }}</label>
+          {{ form.start_date() }}
+          {% for error in form.start_date.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group form-group--half">
+          <label>{{ form.end_date.label }}</label>
+          {{ form.end_date() }}
+          {% for error in form.end_date.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+      </div>
 
-  <p>
-    <label>{{ form.end_date.label }}：</label><br>
-    {{ form.end_date() }}
-    {% for error in form.end_date.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
-  </p>
+      <div class="form-row">
+        <div class="form-group form-group--half">
+          <label>{{ form.monthly_rent.label }}</label>
+          {{ form.monthly_rent() }}
+          {% for error in form.monthly_rent.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group form-group--half">
+          <label>{{ form.deposit.label }}</label>
+          {{ form.deposit() }}
+          {% for error in form.deposit.errors %}<span class="form-error">{{ error }}</span>{% endfor %}
+        </div>
+      </div>
 
-  <p>
-    <label>{{ form.monthly_rent.label }}：</label><br>
-    {{ form.monthly_rent() }}
-    {% for error in form.monthly_rent.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
-  </p>
+      <div class="form-group">
+        <label>{{ form.content.label }}</label>
+        {{ form.content(rows=8, cols=50) }}
+      </div>
 
-  <p>
-    <label>{{ form.deposit.label }}：</label><br>
-    {{ form.deposit() }}
-    {% for error in form.deposit.errors %}<span style="color:red;">{{ error }}</span>{% endfor %}
-  </p>
+      <div class="module-actions">
+        <button type="submit" class="btn btn--primary btn--lg">创建合同</button>
+      </div>
+    </form>
+  </div>
 
-  <p>
-    <label>{{ form.content.label }}：</label><br>
-    {{ form.content(rows=8, cols=50) }}
-  </p>
-
-  <button type="submit">创建合同</button>
-</form>
-
-<p><a href="{{ url_for('contracts.list_contracts') }}">← 返回列表</a></p>
+  <a href="{{ url_for('contracts.list_contracts') }}" class="module-back">返回合同列表</a>
+</div>
 {% endblock %}

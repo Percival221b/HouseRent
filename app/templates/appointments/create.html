@@ -3,38 +3,48 @@
 {% block title %}新建预约 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>新建看房预约</h1>
+<div class="module-shell module-shell--narrow">
+  <div class="module-hero">
+    <span class="module-eyebrow">APPOINTMENT</span>
+    <h1>新建看房预约</h1>
+    <p>选择心仪房源并提交看房时间，房东确认后即可按时看房。</p>
+  </div>
 
-<form method="post" novalidate>
-  {{ form.hidden_tag() }}
+  <div class="module-card">
+    <form method="post" novalidate class="module-form">
+      {{ form.hidden_tag() }}
 
-  <p>
-    <label>选择房源：</label><br>
-    <select name="house_id" required>
-      <option value="">-- 请选择 --</option>
-      {% for h in houses %}
-        <option value="{{ h.id }}" {% if selected_house_id == h.id %}selected{% endif %}>
-          {{ h.title }} - {{ h.address }} - ¥{{ "%.2f"|format(h.rent) }}/月
-        </option>
-      {% endfor %}
-    </select>
-  </p>
+      <div class="form-group">
+        <label>选择房源</label>
+        <select name="house_id" required>
+          <option value="">请选择房源</option>
+          {% for h in houses %}
+            <option value="{{ h.id }}" {% if selected_house_id == h.id %}selected{% endif %}>
+              {{ h.title }} - {{ h.address }} - ¥{{ "%.2f"|format(h.rent) }}/月
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <p>
-    <label>{{ form.appointment_time.label }}：</label><br>
-    {{ form.appointment_time(size=20) }}
-    {% for error in form.appointment_time.errors %}
-      <span style="color:red;">{{ error }}</span>
-    {% endfor %}
-  </p>
+      <div class="form-group">
+        <label>{{ form.appointment_time.label }}</label>
+        {{ form.appointment_time(size=20) }}
+        {% for error in form.appointment_time.errors %}
+          <span class="form-error">{{ error }}</span>
+        {% endfor %}
+      </div>
 
-  <p>
-    <label>{{ form.remark.label }}：</label><br>
-    {{ form.remark(rows=4, cols=40) }}
-  </p>
+      <div class="form-group">
+        <label>{{ form.remark.label }}</label>
+        {{ form.remark(rows=4, cols=40) }}
+      </div>
 
-  <button type="submit">提交预约</button>
-</form>
+      <div class="module-actions">
+        <button type="submit" class="btn btn--primary btn--lg">提交预约</button>
+      </div>
+    </form>
+  </div>
 
-<p><a href="{{ url_for('appointments.list_appointments') }}">← 返回列表</a></p>
+  <a href="{{ url_for('appointments.list_appointments') }}" class="module-back">返回预约列表</a>
+</div>
 {% endblock %}

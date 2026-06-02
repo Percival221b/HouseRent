@@ -1,15 +1,35 @@
 """Seed the database with test house listings for Module C development."""
 import os
 import sys
+import urllib.error
+import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app
 from app.extensions import db
-from app.models import House, User
+from app.models import House, HouseImage, User
 from werkzeug.security import generate_password_hash
 
 app = create_app("development")
+
+DEFAULT_HOUSE_IMAGE = "uploads/houses/default-house.svg"
+DEMO_IMAGE_URLS = [
+    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1615873968403-89e068629265?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=1200&q=80",
+]
 
 TEST_HOUSES = [
     {
@@ -300,8 +320,65 @@ TEST_HOUSES = [
 ]
 
 
+def _write_default_house_image() -> str:
+    """Create the default blank SVG used when a listing has no downloaded image."""
+    upload_dir = os.path.join(app.static_folder, "uploads", "houses")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    file_path = os.path.join(upload_dir, "default-house.svg")
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e6f3f1"/>
+      <stop offset="100%" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <rect x="110" y="170" width="980" height="510" rx="34" fill="#ffffff" opacity="0.9"/>
+  <path d="M250 555V365L600 205L950 365V555H780V420H620V555H250Z" fill="#0f766e" opacity="0.92"/>
+  <path d="M200 375L600 185L1000 375" fill="none" stroke="#0f766e" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="338" y="420" width="116" height="96" rx="12" fill="#ffffff" opacity="0.88"/>
+  <rect x="486" y="420" width="116" height="96" rx="12" fill="#ffffff" opacity="0.88"/>
+  <rect x="760" y="420" width="116" height="96" rx="12" fill="#ffffff" opacity="0.88"/>
+  <text x="600" y="650" text-anchor="middle" font-family="Arial, Microsoft YaHei, sans-serif" font-size="48" font-weight="700" fill="#1f2937">暂无图片</text>
+</svg>
+"""
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(svg)
+    return DEFAULT_HOUSE_IMAGE
+
+
+def _download_demo_house_image(index: int) -> str:
+    """Download a room photo for demo listings, falling back to the default SVG."""
+    upload_dir = os.path.join(app.static_folder, "uploads", "houses")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    filename = f"demo-house-{index + 1:02d}.jpg"
+    file_path = os.path.join(upload_dir, filename)
+    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        return f"uploads/houses/{filename}"
+
+    url = DEMO_IMAGE_URLS[index % len(DEMO_IMAGE_URLS)]
+    try:
+        request = urllib.request.Request(url, headers={"User-Agent": "HouseRent demo seeder"})
+        with urllib.request.urlopen(request, timeout=20) as response:
+            content_type = response.headers.get("Content-Type", "")
+            image_bytes = response.read()
+        if not content_type.startswith("image/") or len(image_bytes) < 1024:
+            raise ValueError(f"Unexpected response from {url}: {content_type}")
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
+        print(f"Downloaded demo image: {filename}")
+        return f"uploads/houses/{filename}"
+    except (OSError, urllib.error.URLError, ValueError) as exc:
+        print(f"Image download failed for listing {index + 1}: {exc}")
+        return _write_default_house_image()
+
+
 def main():
     with app.app_context():
+        _write_default_house_image()
+
         # Create test landlord
         landlord = User.query.filter_by(username="test_landlord").first()
         if not landlord:
@@ -319,17 +396,43 @@ def main():
             print("Created test landlord account")
 
         # Delete old test data
-        House.query.filter(House.title.like("%【测试数据】%")).delete()
+        test_house_ids = [
+            house_id
+            for (house_id,) in House.query
+            .filter(House.title.like("%【测试数据】%"))
+            .with_entities(House.id)
+            .all()
+        ]
+        if test_house_ids:
+            HouseImage.query.filter(HouseImage.house_id.in_(test_house_ids)).delete(
+                synchronize_session=False
+            )
+            House.query.filter(House.id.in_(test_house_ids)).delete(
+                synchronize_session=False
+            )
         db.session.flush()
 
         # Insert test houses
-        for data in TEST_HOUSES:
-            data["landlord_id"] = landlord.id
-            db.session.add(House(**data))
+        for index, data in enumerate(TEST_HOUSES):
+            house_data = {**data, "landlord_id": landlord.id}
+            house = House(**house_data)
+            db.session.add(house)
+            db.session.flush()
+            image_path = _download_demo_house_image(index)
+            db.session.add(
+                HouseImage(
+                    house_id=house.id,
+                    file_path=image_path,
+                    caption="测试房源配图",
+                    sort_order=0,
+                    is_cover=True,
+                )
+            )
 
         db.session.commit()
         count = House.query.count()
         print(f"Inserted {len(TEST_HOUSES)} test houses. Total houses: {count}")
+        print("Demo cover images are stored in app/static/uploads/houses")
         print()
         print("=" * 50)
         print("Test Account (房东)")

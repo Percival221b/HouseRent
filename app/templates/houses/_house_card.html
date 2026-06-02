@@ -4,7 +4,7 @@
     {% if cover %}
     <img src="{{ url_for('static', filename=cover.file_path) }}" alt="{{ house.title }}" loading="lazy">
     {% else %}
-    <div class="house-card__placeholder">暂无图片</div>
+    <img src="{{ url_for('static', filename='uploads/houses/default-house.svg') }}" alt="暂无图片" loading="lazy">
     {% endif %}
     <span class="house-card__rent">&yen;{{ house.rent | int }}<small>/月</small></span>
   </a>
