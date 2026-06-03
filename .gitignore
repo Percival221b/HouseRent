@@ -10,6 +10,9 @@ venv/
 instance/
 app/static/uploads/*
 !app/static/uploads/.gitkeep
+!app/static/uploads/houses/
+!app/static/uploads/houses/.gitkeep
+!app/static/uploads/houses/default-house.svg
+!app/static/uploads/houses/demo-house-*.jpg
 migrations/versions/
 .DS_Store
-
