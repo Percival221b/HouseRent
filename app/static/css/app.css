@@ -47,7 +47,9 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
     "Microsoft YaHei", sans-serif;
   color: var(--color-text);
-  background: var(--color-bg);
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 32rem),
+    linear-gradient(135deg, #f8fafc 0%, #eef7f5 45%, #f8fafc 100%);
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -187,6 +189,9 @@ img {
   gap: 6px;
   text-decoration: none;
 }
+.btn:hover {
+  transform: translateY(-1px);
+}
 .btn--primary {
   background: var(--color-primary);
   color: #fff;
@@ -299,6 +304,42 @@ img {
   border-color: var(--color-border-focus);
   box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
 }
+.form-group input,
+.form-group select,
+.form-group textarea,
+.module-form input,
+.module-form select,
+.module-form textarea,
+.auth-card input,
+.auth-card select,
+.auth-card textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.94rem;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.94);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.module-form input:focus,
+.module-form select:focus,
+.module-form textarea:focus,
+.auth-card input:focus,
+.auth-card select:focus,
+.auth-card textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+  background: #fff;
+}
+.form-group input[type="checkbox"],
+.auth-card input[type="checkbox"] {
+  width: auto;
+}
 .form-input--inline {
   width: auto;
   padding: 6px 10px;
@@ -355,6 +396,154 @@ fieldset.form-section legend {
   display: flex;
   gap: var(--spacing-md);
   margin-top: var(--spacing-xl);
+}
+
+/* ===== Modern Module Pages ===== */
+.module-shell {
+  max-width: 980px;
+  margin: 0 auto;
+}
+.module-shell--narrow {
+  max-width: 720px;
+}
+.module-hero {
+  text-align: center;
+  margin: 0 auto var(--spacing-xl);
+}
+.module-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+.module-hero h1 {
+  font-size: 1.85rem;
+  line-height: 1.25;
+  margin-bottom: var(--spacing-sm);
+}
+.module-hero p {
+  color: var(--color-text-muted);
+  max-width: 620px;
+  margin: 0 auto;
+}
+.module-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-xl);
+  backdrop-filter: blur(12px);
+}
+.module-card + .module-card {
+  margin-top: var(--spacing-lg);
+}
+.module-form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+.module-form .form-row {
+  align-items: flex-start;
+}
+.module-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-lg);
+}
+.module-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--spacing-lg) auto 0;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+.module-back:hover {
+  color: var(--color-primary);
+}
+.data-card {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.data-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+}
+.data-card__head h2 {
+  font-size: 1.1rem;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th {
+  background: #f8fafc;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--color-border);
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+.data-table tbody tr:hover {
+  background: rgba(15, 118, 110, 0.045);
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+.detail-item {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+}
+.detail-item--wide {
+  grid-column: 1 / -1;
+}
+.detail-label {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+.detail-value {
+  font-weight: 650;
+}
+.detail-pre {
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-md);
+  white-space: pre-wrap;
+}
+.empty-panel {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--spacing-2xl);
+}
+.status-text {
+  font-weight: 650;
 }
 
 /* ===== Facility Checkboxes ===== */
@@ -770,31 +959,51 @@ fieldset.form-section legend {
 }
 
 /* ===== Index Page ===== */
+.home-page {
+  max-width: none;
+  padding: 0;
+}
 .hero {
+  min-height: 430px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: center;
   padding: var(--spacing-2xl) var(--spacing-xl);
+  margin: calc(var(--spacing-xl) * -1) calc(var(--spacing-xl) * -1) 0;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(120deg, rgba(15, 23, 42, 0.72), rgba(15, 118, 110, 0.54)),
+    url("../uploads/houses/demo-house-01.jpg") center / cover;
 }
 .hero h1 {
-  font-size: 2rem;
+  font-size: 2.85rem;
+  line-height: 1.12;
   margin-bottom: var(--spacing-md);
+  text-shadow: 0 8px 26px rgba(0, 0, 0, 0.25);
 }
 .hero p {
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--spacing-xl);
-  font-size: 1.05rem;
+  font-size: 1.12rem;
 }
 .hero-search {
   display: flex;
   max-width: 560px;
   margin: 0 auto;
   gap: 0;
+  border-radius: 999px;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
 }
 .hero-search input {
   flex: 1;
-  padding: 12px 18px;
-  border: 1px solid var(--color-border);
-  border-right: none;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  padding: 15px 22px;
+  border: 0;
+  border-right: 1px solid rgba(15, 118, 110, 0.12);
+  border-radius: 0;
   font-size: 1rem;
 }
 .hero-search input:focus {
@@ -802,11 +1011,11 @@ fieldset.form-section legend {
   border-color: var(--color-primary);
 }
 .hero-search button {
-  padding: 12px 28px;
+  padding: 15px 32px;
   background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: 0;
   cursor: pointer;
   font-size: 1rem;
   font-weight: 500;
@@ -815,7 +1024,9 @@ fieldset.form-section legend {
   background: var(--color-primary-hover);
 }
 .featured-section {
-  margin-top: var(--spacing-xl);
+  max-width: var(--max-width);
+  margin: var(--spacing-2xl) auto 0;
+  padding: 0 var(--spacing-xl) var(--spacing-xl);
 }
 .featured-section h2 {
   text-align: center;
@@ -902,8 +1113,12 @@ fieldset.form-section legend {
   padding: var(--spacing-xl);
 }
 .auth-card {
-  max-width: 420px;
+  max-width: 520px;
   margin: var(--spacing-xl) auto;
+  border: 1px solid rgba(255, 255, 255, 0.74);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.94);
 }
 .auth-card h1 {
   margin-bottom: var(--spacing-lg);
@@ -1025,7 +1240,33 @@ th {
   margin-top: var(--spacing-lg);
 }
 @media (max-width: 768px) {
+  .hero {
+    min-height: 360px;
+    margin: calc(var(--spacing-md) * -1) calc(var(--spacing-md) * -1) 0;
+  }
+  .hero h1 {
+    font-size: 2.1rem;
+  }
+  .hero-search {
+    flex-direction: column;
+    border-radius: var(--radius-md);
+  }
+  .hero-search input,
+  .hero-search button {
+    border-radius: 0;
+    width: 100%;
+  }
   .profile-page {
     grid-template-columns: 1fr;
+  }
+  .module-card {
+    padding: var(--spacing-lg);
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .data-card__head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

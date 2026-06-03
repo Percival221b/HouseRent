@@ -12,6 +12,10 @@
         <a href="{{ url_for('main.index') }}" class="header-logo">HouseRent</a>
         <nav class="header-nav">
           <a href="{{ url_for('houses.list_houses') }}">房源列表</a>
+          {% if current_user.is_authenticated and current_user.role == "system_admin" %}
+            <a href="/admin/report">系统报告</a>
+            <a href="{{ url_for('auth.logout') }}">退出</a>
+          {% else %}
           <a href="{{ url_for('appointments.list_appointments') }}">预约</a>
           <a href="{{ url_for('contracts.list_contracts') }}">合同</a>
           <a href="{{ url_for('payments.list_payments') }}">支付</a>
@@ -20,17 +24,18 @@
           {% if current_user.is_authenticated %}
             {% if current_user.role == "landlord" %}
               <a href="{{ url_for('houses.create') }}">发布房源</a>
-              <a href="{{ url_for('landlord.dashboard') }}">房东中心</a>
+              <a href="{{ url_for('user.history') }}">房东中心</a>
             {% elif current_user.role == "admin" %}
               <a href="{{ url_for('admin.dashboard') }}">后台管理</a>
             {% else %}
-              <a href="{{ url_for('tenant.dashboard') }}">租客中心</a>
+              <a href="{{ url_for('user.history') }}">租客中心</a>
             {% endif %}
             <a href="{{ url_for('user.profile') }}" class="nav-user">{{ current_user.username }}</a>
             <a href="{{ url_for('auth.logout') }}">退出</a>
           {% else %}
             <a href="{{ url_for('auth.login') }}">登录</a>
             <a href="{{ url_for('auth.register') }}" class="btn btn--primary">注册</a>
+          {% endif %}
           {% endif %}
         </nav>
       </div>

@@ -9,7 +9,10 @@ def create_app(config_name: str | None = None) -> Flask:
     app.config.from_object(config_by_name(config_name))
 
     register_extensions(app)
+    register_template_helpers(app)
+    register_request_guards(app)
     register_blueprints(app)
+    register_request_logging(app)
     register_error_handlers(app)
 
     return app
@@ -24,6 +27,67 @@ def register_extensions(app: Flask) -> None:
 
     # Import models so that @login_manager.user_loader is registered
     import app.models  # noqa: F401
+
+
+def register_template_helpers(app: Flask) -> None:
+    from flask_wtf.csrf import generate_csrf
+
+    @app.context_processor
+    def inject_csrf_token():
+        return {"csrf_token": generate_csrf}
+
+
+def register_request_guards(app: Flask) -> None:
+    from flask import redirect, request, url_for
+    from flask_login import current_user
+
+    allowed_endpoints = {
+        "admin.dashboard",
+        "auth.logout",
+        "houses.list_houses",
+        "houses.detail",
+        "static",
+    }
+
+    @app.before_request
+    def restrict_system_admin():
+        if not current_user.is_authenticated or current_user.role != "system_admin":
+            return None
+
+        if request.endpoint in allowed_endpoints or request.path == "/admin/report":
+            return None
+
+        return redirect("/admin/report")
+
+
+def register_request_logging(app: Flask) -> None:
+    from flask import request
+    from flask_login import current_user
+
+    @app.after_request
+    def write_system_log(response):
+        if request.endpoint == "static":
+            return response
+
+        try:
+            from app.models.log import SystemLog
+
+            user_id = current_user.id if current_user.is_authenticated else None
+            log = SystemLog(
+                user_id=user_id,
+                action=f"{request.method} {request.endpoint or request.path}",
+                detail=f"status={response.status_code}",
+                ip_address=(request.remote_addr or "")[:45],
+                user_agent=(request.user_agent.string or "")[:255],
+                method=request.method,
+                path=(request.path or "")[:255],
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        return response
 
 
 def register_blueprints(app: Flask) -> None:

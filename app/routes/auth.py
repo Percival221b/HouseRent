@@ -7,6 +7,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from app.extensions import db
 from app.models.user import LoginLog, User, VerificationCode
+from app.utils.email import send_email
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -21,7 +22,7 @@ def _generate_code() -> str:
 
 
 def _send_verification_code(target: str, code_type: str = "register") -> str:
-    code = "111111"  # 开发阶段固定验证码
+    code = _generate_code()
     vc = VerificationCode(
         target=target,
         code=code,
@@ -29,6 +30,11 @@ def _send_verification_code(target: str, code_type: str = "register") -> str:
         expires_at=datetime.utcnow() + timedelta(minutes=5),
     )
     db.session.add(vc)
+    send_email(
+        target,
+        "房屋租赁系统注册验证码",
+        f"您好，您的注册验证码是：{code}\n\n验证码 5 分钟内有效。若非本人操作，请忽略本邮件。",
+    )
     db.session.commit()
     return code
 
@@ -103,6 +109,8 @@ def login():
     next_url = request.args.get("next")
     if next_url:
         return redirect(next_url)
+    if user.role == "system_admin":
+        return redirect("/admin/report")
     return redirect(url_for("main.index"))
 
 
@@ -149,20 +157,18 @@ def register():
     if phone and User.query.filter_by(phone=phone).first():
         errors.append("手机号已被注册")
 
-    # 验证码（开发阶段固定 111111 直接放行）
     vc = None
-    if code != "111111":
-        target = email or phone
+    if not re.fullmatch(r"\d{6}", code):
+        errors.append("验证码应为 6 位数字")
+    else:
         vc = (
             VerificationCode.query
-            .filter_by(target=target, code_type=code_type)
+            .filter_by(target=email, code=code, code_type=code_type, used=False)
             .order_by(VerificationCode.created_at.desc())
             .first()
         )
         if not vc or not vc.is_valid:
-            errors.append("验证码无效或已过期")
-        elif vc.code != code:
-            errors.append("验证码错误")
+            errors.append("验证码错误或已过期")
 
     if errors:
         for e in errors:
@@ -193,12 +199,24 @@ def logout():
 
 @auth_bp.route("/send-code", methods=["POST"])
 def send_code():
-    target = (request.form.get("target") or "").strip()
+    target = (request.form.get("target") or request.form.get("email") or "").strip()
     code_type = request.form.get("code_type") or "register"
 
     if not target:
-        flash("请输入邮箱或手机号", "error")
-        return redirect(request.referrer or url_for("auth.register"))
+        flash("请输入邮箱", "error")
+        return render_template("auth/register.html", form=request.form)
+
+    if not EMAIL_RE.match(target):
+        flash("邮箱格式不正确", "error")
+        return render_template("auth/register.html", form=request.form)
+
+    if code_type != "register":
+        flash("验证码类型无效", "error")
+        return render_template("auth/register.html", form=request.form)
+
+    if User.query.filter_by(email=target).first():
+        flash("邮箱已被注册", "error")
+        return render_template("auth/register.html", form=request.form)
 
     # 限流：1 分钟内同一目标只能发 1 条
     recent = (
@@ -209,11 +227,17 @@ def send_code():
     )
     if recent and (datetime.utcnow() - recent.created_at).total_seconds() < 60:
         flash("验证码发送过于频繁，请 1 分钟后重试", "error")
-        return redirect(request.referrer or url_for("auth.register"))
+        return render_template("auth/register.html", form=request.form)
 
-    code = _send_verification_code(target, code_type)
-    flash(f"验证码已发送（开发模式直接显示）：{code}", "info")
-    return redirect(request.referrer or url_for("auth.register"))
+    try:
+        _send_verification_code(target, code_type)
+    except Exception:
+        db.session.rollback()
+        flash("验证码邮件发送失败，请检查邮箱地址或稍后重试", "error")
+        return render_template("auth/register.html", form=request.form)
+
+    flash("验证码已发送，请查收邮箱", "info")
+    return render_template("auth/register.html", form=request.form)
 
 
 def log_login(user_id: int | None, status: str) -> None:

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}系统报告 - 房屋租赁系统{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom:24px;">系统报告</h1>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ total_houses }}</div>
+    <div class="stat-label">房源总数</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ "%.1f"|format(rental_rate) }}%</div>
+    <div class="stat-label">房源出租率</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">&yen;{{ expected_monthly_income | int }}</div>
+    <div class="stat-label">生效合同月租金</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ unique_login_users_30d }}</div>
+    <div class="stat-label">近 30 天活跃用户</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px;">
+  <h2 style="margin-bottom:16px;">房源出租统计</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>数值</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>空置房源</td><td>{{ vacant_houses }}</td></tr>
+        <tr><td>已出租房源</td><td>{{ rented_houses }}</td></tr>
+        <tr><td>已下架房源</td><td>{{ offline_houses }}</td></tr>
+        <tr><td>生效合同</td><td>{{ active_contracts }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px;">
+  <h2 style="margin-bottom:16px;">租金收入</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>金额</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>已支付收入总额</td><td>&yen;{{ paid_income_total | int }}</td></tr>
+        <tr><td>近 30 天已支付收入</td><td>&yen;{{ paid_income_30d | int }}</td></tr>
+        <tr><td>当前生效合同月租合计</td><td>&yen;{{ expected_monthly_income | int }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px;">
+  <h2 style="margin-bottom:16px;">用户活跃度</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>指标</th>
+          <th>数值</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>用户总数</td><td>{{ total_users }}</td></tr>
+        <tr><td>租客数</td><td>{{ tenant_count }}</td></tr>
+        <tr><td>房东数</td><td>{{ landlord_count }}</td></tr>
+        <tr><td>近 30 天登录成功次数</td><td>{{ successful_logins_30d }}</td></tr>
+        <tr><td>近 30 天活跃用户数</td><td>{{ active_users_30d }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px;">
+  <h2 style="margin-bottom:16px;">系统运行日志</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>时间</th>
+          <th>用户</th>
+          <th>动作</th>
+          <th>路径</th>
+          <th>详情</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_system_logs %}
+        <tr>
+          <td>{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else '-' }}</td>
+          <td>{{ log.user.username if log.user else '-' }}</td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.path or '-' }}</td>
+          <td>{{ log.detail or '-' }}</td>
+          <td>{{ log.ip_address or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6">暂无系统日志。</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

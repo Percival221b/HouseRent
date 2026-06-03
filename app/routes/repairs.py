@@ -6,9 +6,38 @@ from flask_login import current_user, login_required
 from app.extensions import db
 from app.forms.repair import RepairForm
 from app.models.house import House
+from app.models.lease import Contract
 from app.models.maintenance import RepairRequest
 
 repairs_bp = Blueprint("repairs", __name__, url_prefix="/repairs")
+
+TENANT_SERVICE_CONTRACT_STATUSES = ("active",)
+
+
+def _tenant_service_houses(tenant_id: int):
+    return (
+        House.query
+        .join(Contract, Contract.house_id == House.id)
+        .filter(
+            Contract.tenant_id == tenant_id,
+            Contract.status.in_(TENANT_SERVICE_CONTRACT_STATUSES),
+        )
+        .order_by(House.created_at.desc())
+        .all()
+    )
+
+
+def _tenant_can_access_house(tenant_id: int, house_id: int) -> bool:
+    return (
+        Contract.query
+        .filter(
+            Contract.tenant_id == tenant_id,
+            Contract.house_id == house_id,
+            Contract.status.in_(TENANT_SERVICE_CONTRACT_STATUSES),
+        )
+        .first()
+        is not None
+    )
 
 
 @repairs_bp.route("/")
@@ -52,9 +81,17 @@ def create():
 
     form = RepairForm()
     selected_house_id = request.args.get("house_id", type=int)
+    houses = _tenant_service_houses(current_user.id)
 
     if form.validate_on_submit():
         house = House.query.get_or_404(form.house_id.data)
+        if not _tenant_can_access_house(current_user.id, house.id):
+            flash("只能提交自己当前租住房源的报修。", "error")
+            return render_template(
+                "repairs/create.html", form=form, houses=houses,
+                selected_house_id=selected_house_id,
+            )
+
         repair = RepairRequest(
             house_id=house.id,
             tenant_id=current_user.id,
@@ -68,10 +105,6 @@ def create():
 
     if form.house_id.data is None and selected_house_id:
         form.house_id.data = selected_house_id
-
-    houses = House.query.filter_by(status="rented").all() or House.query.filter_by(
-        status="vacant"
-    ).all() or House.query.all()
 
     return render_template(
         "repairs/create.html", form=form, houses=houses,

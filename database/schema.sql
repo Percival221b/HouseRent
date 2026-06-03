@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(120) NULL,
   phone VARCHAR(30) NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role ENUM('tenant', 'landlord', 'admin') NOT NULL DEFAULT 'tenant',
+  role ENUM('tenant', 'landlord', 'admin', 'system_admin') NOT NULL DEFAULT 'tenant',
   real_name VARCHAR(80) NULL,
   avatar_url VARCHAR(255) NULL,
   id_card_number VARCHAR(30) NULL,

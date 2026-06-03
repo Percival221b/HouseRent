@@ -13,6 +13,10 @@
     <div class="stat-value">→</div>
     <div class="stat-label">登录日志</div>
   </a>
+  <a href="/admin/report" class="stat-card">
+    <div class="stat-value">→</div>
+    <div class="stat-label">系统报告</div>
+  </a>
 </div>
 
 <div class="card">
@@ -20,6 +24,7 @@
   <div style="display:flex;gap:12px;">
     <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">用户列表</a>
     <a href="{{ url_for('admin.logs') }}" class="btn btn-secondary">登录日志</a>
+    <a href="/admin/report" class="btn btn-secondary">系统报告</a>
   </div>
 </div>
 {% endblock %}

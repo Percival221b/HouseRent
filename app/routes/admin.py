@@ -1,7 +1,13 @@
+from datetime import datetime, timedelta
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import func
 
 from app.extensions import db
+from app.models.house import House
+from app.models.lease import Contract, Payment
+from app.models.log import SystemLog
 from app.models.user import User
 from app.utils.decorators import role_required
 
@@ -10,8 +16,10 @@ admin_bp = Blueprint("admin", __name__)
 
 @admin_bp.route("/")
 @login_required
-@role_required("admin")
+@role_required("admin", "system_admin")
 def dashboard():
+    if current_user.role == "system_admin":
+        return redirect("/admin/report")
     return render_template("admin/dashboard.html")
 
 
@@ -67,3 +75,81 @@ def logs():
         .paginate(page=page, per_page=per_page, error_out=False)
     )
     return render_template("admin/logs.html", pagination=pagination, logs=pagination.items)
+
+
+@admin_bp.route("/report")
+@login_required
+@role_required("admin", "system_admin")
+def report():
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+
+    total_houses = House.query.count()
+    rented_houses = House.query.filter_by(status="rented").count()
+    vacant_houses = House.query.filter_by(status="vacant").count()
+    offline_houses = House.query.filter_by(status="offline").count()
+    rental_rate = (rented_houses / total_houses * 100) if total_houses else 0
+
+    active_contracts = Contract.query.filter_by(status="active").count()
+    expected_monthly_income = (
+        db.session.query(func.coalesce(func.sum(Contract.monthly_rent), 0))
+        .filter(Contract.status == "active")
+        .scalar()
+    )
+    paid_income_total = (
+        db.session.query(func.coalesce(func.sum(Payment.amount), 0))
+        .filter(Payment.status == "paid")
+        .scalar()
+    )
+    paid_income_30d = (
+        db.session.query(func.coalesce(func.sum(Payment.amount), 0))
+        .filter(Payment.status == "paid", Payment.paid_at >= thirty_days_ago)
+        .scalar()
+    )
+
+    total_users = User.query.count()
+    tenant_count = User.query.filter_by(role="tenant").count()
+    landlord_count = User.query.filter_by(role="landlord").count()
+    active_users_30d = User.query.filter(User.last_login_at >= thirty_days_ago).count()
+
+    from app.models.user import LoginLog
+
+    successful_logins_30d = LoginLog.query.filter(
+        LoginLog.status == "success",
+        LoginLog.created_at >= thirty_days_ago,
+    ).count()
+    unique_login_users_30d = (
+        db.session.query(func.count(func.distinct(LoginLog.user_id)))
+        .filter(
+            LoginLog.status == "success",
+            LoginLog.user_id.isnot(None),
+            LoginLog.created_at >= thirty_days_ago,
+        )
+        .scalar()
+    )
+
+    recent_system_logs = (
+        SystemLog.query
+        .order_by(SystemLog.created_at.desc())
+        .limit(25)
+        .all()
+    )
+
+    return render_template(
+        "admin/report.html",
+        total_houses=total_houses,
+        rented_houses=rented_houses,
+        vacant_houses=vacant_houses,
+        offline_houses=offline_houses,
+        rental_rate=rental_rate,
+        active_contracts=active_contracts,
+        expected_monthly_income=expected_monthly_income,
+        paid_income_total=paid_income_total,
+        paid_income_30d=paid_income_30d,
+        total_users=total_users,
+        tenant_count=tenant_count,
+        landlord_count=landlord_count,
+        active_users_30d=active_users_30d,
+        successful_logins_30d=successful_logins_30d,
+        unique_login_users_30d=unique_login_users_30d,
+        recent_system_logs=recent_system_logs,
+    )

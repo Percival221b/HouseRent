@@ -3,50 +3,70 @@
 {% block title %}预约详情 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>预约详情</h1>
-
 {% set a = appointment %}
-<table border="1" cellpadding="8" cellspacing="0">
-  <tr><td>ID</td><td>{{ a.id }}</td></tr>
-  <tr><td>房源</td><td>{{ a.house.title if a.house else '-' }}</td></tr>
-  <tr><td>房源地址</td><td>{{ a.house.address if a.house else '-' }}</td></tr>
-  <tr><td>租客</td><td>{{ a.tenant.username }}</td></tr>
-  <tr><td>房东</td><td>{{ a.landlord.username }}</td></tr>
-  <tr><td>预约时间</td><td>{{ a.appointment_time.strftime('%Y-%m-%d %H:%M') if a.appointment_time else '-' }}</td></tr>
-  <tr><td>状态</td><td>{{ a.status }}</td></tr>
-  <tr><td>备注</td><td>{{ a.remark or '-' }}</td></tr>
-  <tr><td>房东回复</td><td>{{ a.reply or '-' }}</td></tr>
-</table>
+<div class="module-shell">
+  <div class="module-hero">
+    <span class="module-eyebrow">APPOINTMENT DETAIL</span>
+    <h1>预约详情</h1>
+    <p>{{ a.house.title if a.house else '房源信息' }}</p>
+  </div>
 
-<p><a href="{{ url_for('appointments.list_appointments') }}">← 返回列表</a></p>
-
-{% if a.status == "pending" %}
-  {% if current_user.id == a.landlord_id %}
-    <div style="border:1px solid #ccc; padding:12px; margin-top:12px;">
-      <h3>审批预约</h3>
-      <form method="post" action="{{ url_for('appointments.approve', appointment_id=a.id) }}" style="margin-bottom:8px;">
-        <label>回复：</label><br>
-        <textarea name="reply" rows="2" cols="40"></textarea><br>
-        <button type="submit">同意</button>
-      </form>
-      <form method="post" action="{{ url_for('appointments.reject', appointment_id=a.id) }}">
-        <label>拒绝原因：</label><br>
-        <textarea name="reply" rows="2" cols="40"></textarea><br>
-        <button type="submit" style="background:#c00;color:#fff;">拒绝</button>
-      </form>
+  <div class="module-card">
+    <div class="detail-grid">
+      <div class="detail-item"><span class="detail-label">预约编号</span><span class="detail-value">#{{ a.id }}</span></div>
+      <div class="detail-item"><span class="detail-label">状态</span><span class="badge badge--info">{{ a.status }}</span></div>
+      <div class="detail-item detail-item--wide"><span class="detail-label">房源</span><span class="detail-value">{{ a.house.title if a.house else '-' }}</span></div>
+      <div class="detail-item detail-item--wide"><span class="detail-label">房源地址</span><span class="detail-value">{{ a.house.address if a.house else '-' }}</span></div>
+      <div class="detail-item"><span class="detail-label">租客</span><span class="detail-value">{{ a.tenant.username }}</span></div>
+      <div class="detail-item"><span class="detail-label">房东</span><span class="detail-value">{{ a.landlord.username }}</span></div>
+      <div class="detail-item"><span class="detail-label">预约时间</span><span class="detail-value">{{ a.appointment_time.strftime('%Y-%m-%d %H:%M') if a.appointment_time else '-' }}</span></div>
+      <div class="detail-item"><span class="detail-label">房东回复</span><span class="detail-value">{{ a.reply or '-' }}</span></div>
+      <div class="detail-item detail-item--wide"><span class="detail-label">备注</span><span class="detail-value">{{ a.remark or '-' }}</span></div>
     </div>
-  {% endif %}
 
-  {% if current_user.id == a.tenant_id %}
-    <form method="post" action="{{ url_for('appointments.cancel', appointment_id=a.id) }}" style="margin-top:12px;">
-      <button type="submit">取消预约</button>
-    </form>
-  {% endif %}
-{% endif %}
+    {% if a.status == "pending" %}
+      {% if current_user.id == a.landlord_id %}
+        <div class="module-card">
+          <h2>审批预约</h2>
+          <form method="post" action="{{ url_for('appointments.approve', appointment_id=a.id) }}" class="module-form">
+            <div class="form-group">
+              <label>回复</label>
+              <textarea name="reply" rows="3"></textarea>
+            </div>
+            <div class="module-actions">
+              <button type="submit" class="btn btn--primary">同意预约</button>
+            </div>
+          </form>
+          <form method="post" action="{{ url_for('appointments.reject', appointment_id=a.id) }}" class="module-form">
+            <div class="form-group">
+              <label>拒绝原因</label>
+              <textarea name="reply" rows="3"></textarea>
+            </div>
+            <div class="module-actions">
+              <button type="submit" class="btn btn--danger">拒绝预约</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
 
-{% if a.status == "approved" and current_user.id in (a.tenant_id, a.landlord_id) %}
-  <form method="post" action="{{ url_for('appointments.complete', appointment_id=a.id) }}" style="margin-top:12px;">
-    <button type="submit">标记完成</button>
-  </form>
-{% endif %}
+      {% if current_user.id == a.tenant_id %}
+        <div class="module-actions">
+          <form method="post" action="{{ url_for('appointments.cancel', appointment_id=a.id) }}">
+            <button type="submit" class="btn btn--outline">取消预约</button>
+          </form>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% if a.status == "approved" and current_user.id in (a.tenant_id, a.landlord_id) %}
+      <div class="module-actions">
+        <form method="post" action="{{ url_for('appointments.complete', appointment_id=a.id) }}">
+          <button type="submit" class="btn btn--primary">标记完成</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <a href="{{ url_for('appointments.list_appointments') }}" class="module-back">返回预约列表</a>
+</div>
 {% endblock %}

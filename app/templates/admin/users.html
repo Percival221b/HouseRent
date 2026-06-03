@@ -22,6 +22,8 @@
           <td>
             {% if u.role == 'admin' %}
               <span class="badge badge-danger">管理员</span>
+            {% elif u.role == 'system_admin' %}
+              <span class="badge badge-info">系统管理员</span>
             {% elif u.role == 'landlord' %}
               <span class="badge badge-warning">房东</span>
             {% else %}

@@ -15,7 +15,7 @@
       <input type="email" id="email" name="email" required placeholder="用于验证和登录" value="{{ request.form.email or '' }}">
     </div>
     <div class="form-group">
-      <label for="phone">手机号 <span style="color:var(--gray-500);font-weight:400;">（选填）</span></label>
+      <label for="phone">手机号 <span style="color:var(--color-text-muted);font-weight:400;">（选填）</span></label>
       <input type="tel" id="phone" name="phone" placeholder="11 位手机号" value="{{ request.form.phone or '' }}">
     </div>
     <div class="form-group">
@@ -36,14 +36,21 @@
     <div class="form-group">
       <label for="code">邮箱验证码</label>
       <div class="form-row">
-        <input type="text" id="code" name="code" required placeholder="6 位数字" style="flex:2;">
-        <button type="button" class="btn btn-secondary btn-sm" style="flex:1;white-space:nowrap;" onclick="alert('验证码: 111111')">发送验证码</button>
+        <input type="text" id="code" name="code" required placeholder="6 位数字">
+        <button
+          type="submit"
+          class="btn btn-secondary btn-sm"
+          style="white-space:nowrap;"
+          formaction="{{ url_for('auth.send_code') }}"
+          formmethod="POST"
+          formnovalidate
+        >发送验证码</button>
       </div>
     </div>
     <input type="hidden" name="code_type" value="register">
     <button type="submit" class="btn btn-primary mt-16">注册</button>
   </form>
-  <p class="text-center mt-16" style="font-size:14px;color:var(--gray-500);">
+  <p class="text-center mt-16" style="font-size:14px;color:var(--color-text-muted);">
     已有账号？<a href="{{ url_for('auth.login') }}">立即登录</a>
   </p>
 </div>

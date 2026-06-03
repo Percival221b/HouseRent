@@ -1,9 +1,8 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, url_for
 
 tenant_bp = Blueprint("tenant", __name__)
 
 
 @tenant_bp.route("/")
 def dashboard():
-    return render_template("tenant/dashboard.html")
-
+    return redirect(url_for("user.history"))

@@ -3,42 +3,54 @@
 {% block title %}合同管理 - 房屋租赁系统{% endblock %}
 
 {% block content %}
-<h1>合同管理</h1>
+<div class="module-shell">
+  <div class="module-hero">
+    <span class="module-eyebrow">CONTRACTS</span>
+    <h1>合同管理</h1>
+    <p>查看租赁合同、签署进度和租期金额，房东可创建新的合同记录。</p>
+  </div>
 
-{% if current_user.role in ("landlord", "admin") %}
-  <p><a href="{{ url_for('contracts.create') }}">+ 新建合同</a></p>
-{% endif %}
-
-{% if contracts %}
-  <table border="1" cellpadding="8" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>合同编号</th>
-        <th>房源</th>
-        <th>租客</th>
-        <th>房东</th>
-        <th>租期</th>
-        <th>月租金</th>
-        <th>状态</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in contracts %}
-        <tr>
-          <td>{{ c.contract_no }}</td>
-          <td>{{ c.house.title if c.house else '-' }}</td>
-          <td>{{ c.tenant.username }}</td>
-          <td>{{ c.landlord.username }}</td>
-          <td>{{ c.start_date }} ~ {{ c.end_date }}</td>
-          <td>¥{{ "%.2f"|format(c.monthly_rent) }}</td>
-          <td>{{ c.status }}</td>
-          <td><a href="{{ url_for('contracts.detail', contract_id=c.id) }}">查看</a></td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% else %}
-  <p>暂无合同记录。</p>
-{% endif %}
+  <div class="data-card">
+    <div class="data-card__head">
+      <h2>合同记录</h2>
+      {% if current_user.role in ("landlord", "admin") %}
+        <a href="{{ url_for('contracts.create') }}" class="btn btn--primary">新建合同</a>
+      {% endif %}
+    </div>
+    {% if contracts %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>合同编号</th>
+              <th>房源</th>
+              <th>租客</th>
+              <th>房东</th>
+              <th>租期</th>
+              <th>月租金</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in contracts %}
+              <tr>
+                <td>{{ c.contract_no }}</td>
+                <td>{{ c.house.title if c.house else '-' }}</td>
+                <td>{{ c.tenant.username }}</td>
+                <td>{{ c.landlord.username }}</td>
+                <td>{{ c.start_date }} ~ {{ c.end_date }}</td>
+                <td>¥{{ "%.2f"|format(c.monthly_rent) }}</td>
+                <td><span class="badge badge--info">{{ c.status }}</span></td>
+                <td><a href="{{ url_for('contracts.detail', contract_id=c.id) }}" class="btn btn--outline btn--sm">查看</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-panel">暂无合同记录。</div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

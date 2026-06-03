@@ -21,7 +21,9 @@
     </div>
     {% endif %}
     {% else %}
-    <div class="gallery-placeholder">暂无图片</div>
+    <div class="gallery-main">
+      <img src="{{ url_for('static', filename='uploads/houses/default-house.svg') }}" alt="暂无图片" id="gallery-main-img">
+    </div>
     {% endif %}
   </div>
 
